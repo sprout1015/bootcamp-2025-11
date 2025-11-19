@@ -1,0 +1,36 @@
+{
+  "employees" :[
+    {
+      "id": 1,
+      "name": "John",
+      "age": 35,
+      "job": "frontend",
+      "language": "react",
+      "pay": 12
+    },
+    {
+      "id": 2,
+      "name": "Qohn",
+      "age": 15,
+      "job": "backend",
+      "language": "java",
+      "pay": 13
+    },
+    {
+      "id": 3,
+      "name": "Wohn",
+      "age": 25,
+      "job": "AI",
+      "language": "python",
+      "pay": 41
+    },
+    {
+      "id": 4,
+      "name": "Eohn",
+      "age": 55,
+      "job": "Infra",
+      "language": "AWS",
+      "pay": 51
+    }
+  ]
+}
