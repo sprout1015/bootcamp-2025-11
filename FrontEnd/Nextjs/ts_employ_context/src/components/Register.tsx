@@ -1,16 +1,14 @@
 import React, {useState} from 'react';
-import type {EmployeeInfo} from "@/components/Main";
 import {formStyle, inputStyle, labelStyle} from "@/util/Style";
-
-interface RegisterProps {
-    handleRegisterEmployee: (info:EmployeeInfo) => void;
-}
+import {EmployeeInfo, useEmployee} from "@/context/EmployeeContext";
 
 const initialInfo: EmployeeInfo = {
     id:0, name:'', job:'', pay: 0, age: 0, language: ''
 }
 
-const Register = ({handleRegisterEmployee}: RegisterProps) => {
+const Register = () => {
+    const {handleRegisterEmployee} = useEmployee();
+
     const [info, setInfo] = useState<EmployeeInfo>(initialInfo);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=> {

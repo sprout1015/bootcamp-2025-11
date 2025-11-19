@@ -1,19 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import type {EmployeeInfo} from "@/components/Main";
 import {formStyle, inputStyle, labelStyle} from "@/util/Style";
+import {EmployeeInfo, useEmployee} from "@/context/EmployeeContext";
 
-interface UpdateProps {
-    infoList: EmployeeInfo[];
-    selectedId?: number;
-    handleUpdateEmployee: (info:EmployeeInfo) => void;
-}
 
 const initialInfo: EmployeeInfo = {
     id:0, name:'', job:'', pay: 0, age: 0, language: ''
 }
 
-const Update = ({ infoList, selectedId, handleUpdateEmployee }: UpdateProps) => {
+const Update = () => {
     const [infoToUpdate, setInfoToUpdate] = useState<EmployeeInfo>(initialInfo);
+    const { infoList, selectedId, handleUpdateEmployee } = useEmployee();
 
     // useEffect (SelectedId 변경에 따른 상태 감지용)
     useEffect(() => {
