@@ -1,3 +1,4 @@
+'use client'
 import React, {createContext, PropsWithChildren, useContext, useMemo, useState} from 'react';
 
 // ✅ 타입스크립트의 타입 별칭(type alias) 사용
@@ -13,13 +14,6 @@ export type EmployeeInfo = {
 }
 
 export type Mode = "default" | "register" | "update" | "delete" | "reset"
-
-const modeList = useMemo(() => [
-        {id:"register" as const, label:"register"},
-        {id:"update" as const, label:"update"},
-        {id:"delete" as const, label:"delete"},
-        {id:"reset" as const, label:"reset"}]
-    , [])
 
 
 // ✅ 초기 상태값: EmployeeInfo 객체 배열
@@ -57,6 +51,14 @@ export const EmployeeProvider = ({children}:PropsWithChildren) => {
     // ✅ mode는 현재 UI의 모드(등록, 수정 등)를 관리하는 상태입니다.
     const [mode, setMode] = useState<Mode>("default");
 
+    const modeList = useMemo(() => [
+            {id:"register" as const, label:"register"},
+            {id:"update" as const, label:"update"},
+            {id:"delete" as const, label:"delete"},
+            {id:"reset" as const, label:"reset"}]
+        , [])
+
+
     const handleMode = (mod: Mode) => {
         switch (mod){
             case "update":
@@ -93,7 +95,6 @@ export const EmployeeProvider = ({children}:PropsWithChildren) => {
                 setMode(mod)
         }
     }
-
     // 자식 컴포넌트(EmployeeList)로부터 호출될 함수.
     // 자식이 부모의 상태(selectedId)를 변경할 수 있도록 함수 자체를 props로 전달합니다.
     const handleSelectedId = (id: number) => {
