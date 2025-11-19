@@ -1,8 +1,8 @@
 // ✅ 하위 컴포넌트: 부모(Main) 컴포넌트로부터 props를 받아 직원 리스트를 렌더링합니다.
-import React from 'react';
+import React, {useContext} from 'react';
 // ✅ 타입 재사용을 위한 import
 // @< 절대경로
-import type { EmployeeInfo } from "@/components/Main";
+import {EmployeeContext, EmployeeInfo, useEmployee} from "@/context/EmployeeContext";
 import InfoTable from "@/components/InfoTable";
 import {buttonBarStyle} from "./Main"
 
@@ -12,22 +12,12 @@ const buttonStyles: React.CSSProperties = {
     border: "1px solid #ccc"
 }
 
-// --- Props 타입 정의 ---
-// TypeScript 인터페이스를 사용하여 이 컴포넌트가 받을 props의 형태(shape)를 정의합니다.
-// 이를 통해 props의 타입을 명확히 하고, 개발 중 실수를 방지할 수 있습니다.
-interface EmployeeInfoProps {
-    infoList: EmployeeInfo[]; // 직원 정보 배열
-    selectedId?: number;      // 선택된 직원의 ID (optional)
-    handleSelectedId: (id:number) => void; // 직원을 선택했을 때 호출될 함수
-}
-
 // --- 컴포넌트 선언 및 Props 사용 ---
 // 함수형 컴포넌트를 선언합니다.
 // 파라미터에서 '구조 분해 할당'을 사용하여 props 객체에서 필요한 값들을 바로 추출합니다.
 // 이렇게 하면 함수 본문에서 'props.infoList' 대신 'infoList'처럼 바로 사용할 수 있어 코드가 간결해집니다.
-const EmployeeList = ({ infoList, selectedId, handleSelectedId }: EmployeeInfoProps) => {
-
-    const props = {infoList, selectedId}
+const EmployeeList = () => {
+    const {infoList, handleSelectedId} = useEmployee();
 
     return (
         <>
@@ -55,7 +45,7 @@ const EmployeeList = ({ infoList, selectedId, handleSelectedId }: EmployeeInfoPr
                     ))
                 }
             </div>
-            <InfoTable {...props}/>
+            <InfoTable />
         </>
     );
 };
