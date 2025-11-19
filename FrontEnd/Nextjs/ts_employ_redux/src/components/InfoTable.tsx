@@ -1,8 +1,11 @@
 import React, {useMemo} from 'react';
-import {EmployeeInfo, useEmployee} from "@/context/EmployeeContext";
+import {useSelector} from "react-redux";
+import {RootState} from "@/redux/employStore";
+import {EmployeeInfo} from "@/redux/employeeSlice";
 
 const InfoTable = () => {
-    const {infoList, selectedId} = useEmployee();
+    const {infoList, selectedId} = useSelector((state:RootState) => state.empStore)
+
     const dataList = useMemo<EmployeeInfo[]>    (()=>
         infoList, [selectedId, infoList]
     );

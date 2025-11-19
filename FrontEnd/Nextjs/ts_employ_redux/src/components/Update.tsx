@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {formStyle, inputStyle, labelStyle} from "@/util/Style";
-import {EmployeeInfo, useEmployee} from "@/context/EmployeeContext";
+import {EmployeeInfo, handleUpdateEmployee} from "@/redux/employeeSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "@/redux/employStore";
 
 
 const initialInfo: EmployeeInfo = {
@@ -8,8 +10,10 @@ const initialInfo: EmployeeInfo = {
 }
 
 const Update = () => {
+    const dispatch = useDispatch();
+    const { infoList, selectedId } = useSelector((state:RootState) => state.empStore)
+
     const [infoToUpdate, setInfoToUpdate] = useState<EmployeeInfo>(initialInfo);
-    const { infoList, selectedId, handleUpdateEmployee } = useEmployee();
 
     // useEffect (SelectedId 변경에 따른 상태 감지용)
     useEffect(() => {
@@ -25,7 +29,7 @@ const Update = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>)=> {
         e.preventDefault();
-        handleUpdateEmployee(infoToUpdate);
+        dispatch(handleUpdateEmployee(infoToUpdate));
     }
 
     return (

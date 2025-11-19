@@ -1,13 +1,14 @@
 import React, {useState} from 'react';
 import {formStyle, inputStyle, labelStyle} from "@/util/Style";
-import {EmployeeInfo, useEmployee} from "@/context/EmployeeContext";
+import {useDispatch} from "react-redux";
+import {EmployeeInfo, handleRegisterEmployee} from "@/redux/employeeSlice";
 
 const initialInfo: EmployeeInfo = {
     id:0, name:'', job:'', pay: 0, age: 0, language: ''
 }
 
 const Register = () => {
-    const {handleRegisterEmployee} = useEmployee();
+    const dispatch = useDispatch();
 
     const [info, setInfo] = useState<EmployeeInfo>(initialInfo);
 
@@ -18,7 +19,7 @@ const Register = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>)=> {
         e.preventDefault();
-        handleRegisterEmployee(info);
+        dispatch(handleRegisterEmployee(info));
     }
 
     const checkValidity = (e: React.InvalidEvent<HTMLInputElement>)=> {

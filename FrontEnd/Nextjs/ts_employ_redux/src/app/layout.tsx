@@ -1,5 +1,6 @@
 import "./globals.css";
 import {Metadata} from "next";
+import Providers from "@/redux/Providers";
 
 export const metadata: Metadata = {
     title: "Employee",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        {children}
+        <Providers>
+            {children}
+        </Providers>
       </body>
     </html>
   );

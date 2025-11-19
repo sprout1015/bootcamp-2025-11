@@ -1,10 +1,12 @@
 // ✅ 하위 컴포넌트: 부모(Main) 컴포넌트로부터 props를 받아 직원 리스트를 렌더링합니다.
-import React, {useContext} from 'react';
+import React from 'react';
 // ✅ 타입 재사용을 위한 import
 // @< 절대경로
-import {EmployeeContext, EmployeeInfo, useEmployee} from "@/context/EmployeeContext";
 import InfoTable from "@/components/InfoTable";
 import {buttonBarStyle} from "./Main"
+import {useDispatch, useSelector} from "react-redux";
+import {RootDispatch, RootState} from "@/redux/employStore";
+import {EmployeeInfo, handleSelectedId} from "@/redux/employeeSlice";
 
 const buttonStyles: React.CSSProperties = {
     padding: "6px 10px",
@@ -17,7 +19,8 @@ const buttonStyles: React.CSSProperties = {
 // 파라미터에서 '구조 분해 할당'을 사용하여 props 객체에서 필요한 값들을 바로 추출합니다.
 // 이렇게 하면 함수 본문에서 'props.infoList' 대신 'infoList'처럼 바로 사용할 수 있어 코드가 간결해집니다.
 const EmployeeList = () => {
-    const {infoList, handleSelectedId} = useEmployee();
+    const {infoList} = useSelector((state:RootState) => state.empStore);
+    const dispatch = useDispatch<RootDispatch>();
 
     return (
         <>
@@ -38,7 +41,7 @@ const EmployeeList = () => {
                             // 버튼 클릭 시, 부모로부터 받은 handleSelectedId 함수를 호출합니다.
                             // 이때 해당 직원의 id를 인자로 전달하여, 자식 컴포넌트(EmployeeList)에서 발생한 이벤트를
                             // 부모 컴포넌트(Main)에 알리고 상태를 변경하게 합니다. (자식 -> 부모 데이터 전달 패턴)
-                            onClick={()=>handleSelectedId(info.id)}
+                            onClick={()=>dispatch(handleSelectedId(info.id))}
                         >
                             {info.name}
                         </button>

@@ -7,7 +7,9 @@ import React from 'react';
 import EmployeeList from "@/components/EmployeeList";
 import Update from "@/components/Update";
 import Register from "@/components/Register";
-import {EmployeeProvider, useEmployee} from "@/context/EmployeeContext"; // ✅ props를 전달받는 하위 컴포넌트
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "@/redux/employStore";
+import {handleMode} from "@/redux/employeeSlice";
 
 export const buttonBarStyle:React.CSSProperties = {
     display: "flex",
@@ -20,8 +22,9 @@ export const buttonBarStyle:React.CSSProperties = {
 }
 
 
-const MainContent = () => {
-    const {mode, modeList, handleMode} = useEmployee()
+const Main = () => {
+    const {mode, modeList} = useSelector((state:RootState) => state.empStore);
+    const dispatch = useDispatch();
 
     return (
         // 여러 JSX 요소를 반환할 때는 Fragment(<></>)로 감싸야 합니다.
@@ -33,7 +36,7 @@ const MainContent = () => {
                 {
                     modeList.map(mode=> (
                     <button key={mode.id}
-                        onClick={()=>handleMode(mode.id)} >
+                        onClick={()=>dispatch(handleMode(mode.id))} >
                         {mode.label}
                     </button>
                 ))
@@ -46,13 +49,5 @@ const MainContent = () => {
         </>
     );
 };
-
-const Main = () => {
-    return (
-        <EmployeeProvider>
-            <MainContent />
-        </EmployeeProvider>
-    )
-}
 
 export default Main;
