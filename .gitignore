@@ -1,1 +1,7 @@
 node_modules/
+.idea/
+.next/
+FrontEnd/Nextjs/ts_employ/.next/
+FrontEnd/Nextjs/ts_employ/.idea/
+FrontEnd/Nextjs/ts_employ/package-lock.json
+FrontEnd/Nextjs/ts_employ_context/package-lock.json
