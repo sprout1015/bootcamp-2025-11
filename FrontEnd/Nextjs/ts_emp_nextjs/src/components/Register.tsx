@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {formStyle, inputStyle, labelStyle} from "@/util/Style";
 import {useDispatch, useSelector} from "react-redux";
 import {EmployeeInfo} from "@/redux/slice/employeeSlice";
@@ -41,6 +41,7 @@ const Register = () => {
             return;
         }
         dispatch(registerEmployeeInfo(info));
+
     }
 
     const checkValidity = (e: React.InvalidEvent<HTMLInputElement>)=> {
