@@ -79,8 +79,8 @@ export const deleteEmployeeInfoById
     "emp/deleteEmployeeInfoById",
     async (id, thunkAPI) => {
         try{
-            const response = await axios.delete(`${API_URL}/app/emp/${id}`)
-            return  response.data;
+            await axios.delete(`${API_URL}/app/emp/${id}`);
+            return id; // API의 응답 대신 요청에 사용된 id를 그대로 반환합니다.
         } catch (e){
             return thunkAPI.rejectWithValue("삭제 실패")
         }

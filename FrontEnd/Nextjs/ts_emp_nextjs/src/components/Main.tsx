@@ -8,8 +8,9 @@ import EmployeeList from "@/components/EmployeeList";
 import Update from "@/components/Update";
 import Register from "@/components/Register";
 import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "@/redux/employStore";
+import {RootDispatch, RootState} from "@/redux/employStore";
 import {handleMode} from "@/redux/slice/employeeSlice";
+import Delete from "@/components/Delete";
 
 export const buttonBarStyle:React.CSSProperties = {
     display: "flex",
@@ -24,11 +25,12 @@ export const buttonBarStyle:React.CSSProperties = {
 
 const Main = () => {
     const {mode, modeList} = useSelector((state:RootState) => state.empStore);
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<RootDispatch>();
 
     return (
         // 여러 JSX 요소를 반환할 때는 Fragment(<></>)로 감싸야 합니다.
         <>
+            <Delete />
             <div>
                 <EmployeeList />
             </div>

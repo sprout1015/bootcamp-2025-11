@@ -2,7 +2,7 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {
     deleteEmployeeInfoById,
     fetchEmployeeInfoById,
-    fetchEmployeeInfoList,
+    fetchEmployeeInfoList, putEmployeeInfoById,
     registerEmployeeInfo
 } from "@/redux/api/employeeAPI";
 
@@ -52,29 +52,13 @@ const initialEmployeeState: EmployeeStateType = {
 const handleModeReducer = (
     state: EmployeeStateType, action : PayloadAction<Mode>) => {
     const mode = action.payload;
-    const {infoList, selectedId} = state;
+    const {selectedId} = state;
     switch (mode){
         case "update":
             if (!selectedId)
                 alert("직원을 선택해주세요");
             else
                 state.mode = mode;
-            break;
-        case "delete":
-            if (!selectedId){
-                alert("직원을 선택해주세요");
-                break;
-            }
-            const targetInfo = infoList.find(target => target.id === selectedId)
-            if (!targetInfo)
-                alert("해당 직원은 존재하지 않는 직원입니다");
-            else
-            if (confirm(`${targetInfo.name} 직원을 삭제할까요?`)) {
-                // filter를 사용하여 삭제할 직원을 제외한 새 배열을 만듭니다. (불변성 유지)
-                state.infoList = infoList.filter(info => info.id !== selectedId);
-                state.mode ="default";
-                state.selectedId = 0;
-            }
             break;
         case "reset":
             if(confirm("목록을 초기 데이터로 돌릴까요?"))
@@ -139,8 +123,7 @@ const employeeSlice = createSlice(
                     state.loading = true;
                     state.error = null;
                 })
-                .addCase(fetchEmployeeInfoList.fulfilled
-                    , (state, action) => {
+                .addCase(fetchEmployeeInfoList.fulfilled, (state, action) => {
                         state.loading = false;
                         state.infoList = action.payload; // === response.data
                 })
@@ -177,6 +160,7 @@ const employeeSlice = createSlice(
                 .addCase(registerEmployeeInfo.fulfilled
                     , (state, action) => {
                         state.loading = false;
+                        state.infoList.push(action.payload);
                     })
                 .addCase(registerEmployeeInfo.rejected
                     , (state, action) => {
@@ -187,15 +171,39 @@ const employeeSlice = createSlice(
             builder
                 .addCase(
                     deleteEmployeeInfoById.pending
-                    , (state, action) => {
+                    , (state) => {
                         state.loading = true;
                         state.error = null;
                     })
                 .addCase(deleteEmployeeInfoById.fulfilled
                     , (state, action) => {
                         state.loading = false;
+                        state.infoList = state.infoList.filter(emp => emp.id !== action.payload);
+                        state.mode = "default";
+                        state.selectedId = 0;
                     })
                 .addCase(deleteEmployeeInfoById.rejected
+                    , (state, action) => {
+                        state.loading = false;
+                        state.error = action.payload?? "알 수 없는 이유";
+                    })
+            // 수정
+            builder
+                .addCase(
+                    putEmployeeInfoById.pending
+                    , (state, action) => {
+                        state.loading = true;
+                        state.error = null;
+                    })
+                .addCase(putEmployeeInfoById.fulfilled
+                    , (state, action) => {
+                        state.loading = false;
+                        state.infoList = state.infoList.map(item =>
+                            item.id === action.payload.id ? action.payload : item
+                        );
+                        state.mode = "default";
+                    })
+                .addCase(putEmployeeInfoById.rejected
                     , (state, action) => {
                         state.loading = false;
                         state.error = action.payload?? "알 수 없는 이유";
