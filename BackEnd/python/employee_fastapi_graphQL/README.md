@@ -2,6 +2,13 @@
 
 본 프로젝트는 `FastAPI`와 `strawberry` 라이브러리를 사용하여 GraphQL API를 구축한 간단한 직원 관리 CRUD 예제입니다.
 
+이 프로젝트는 간단한 CRUD 기능 외에도, 실제 프로덕션 환경에서 고려할 수 있는 다음과 같은 발전된 아키텍처 패턴을 포함하고 있습니다.
+
+- **서비스 추상화**: 데이터베이스, 파일 스토리지, 세션 관리 등의 기능을 `InMemory`, `Database`, `GCS`, `VertexAI` 등 다양한 구현체로 교체할 수 있도록 설계되었습니다. 이를 통해 로컬 개발과 클라우드 배포 환경 간의 전환이 용이합니다.
+- **FastAPI 생명주기 관리**: `asynccontextmanager`와 `lifespan`을 사용하여, 애플리케이션의 시작과 종료 시점에 리소스를 안전하게 초기화하고 정리하는 패턴을 보여줍니다.
+- **다양한 응답 방식 지원**: 일반적인 JSON 응답 외에도, 실시간 통신을 위한 `Server-Sent Events(SSE)` 및 `WebSocket` 프로토콜을 지원하는 엔드포인트를 포함합니다.
+- **외부 API 연동 및 안정성 처리**: Github GraphQL API와 연동하는 예제를 통해, 외부 API의 요청 횟수 제한(Rate Limiting)과 같은 실제 문제를 어떻게 처리하는지 보여줍니다.
+
 ## 1. GraphQL 사용의 이점
 
 GraphQL은 API를 위한 쿼리 언어이자 런타임으로, 기존의 REST API가 가진 몇 가지 한계점을 해결합니다.
@@ -88,7 +95,7 @@ uvicorn main:app --reload --port 3002
 
 ```graphql
 query {
-  employees {
+  get_employee_list {
     id
     name
     age

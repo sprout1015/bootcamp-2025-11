@@ -34,8 +34,13 @@ EMPLOYEELIST: List[Employee] = [
 @strawberry.type
 class Query:
     @strawberry.field
-    def employees(self) -> List[Employee]:
+    def get_employee_list(self) -> List[Employee]:
         return EMPLOYEELIST
+
+    @strawberry.field
+    def get_employee_by_id(self, input: int) -> Employee:
+        result = next((item for item in EMPLOYEELIST if item.id == str(input)), None)
+        return result
 
 @strawberry.type
 class Mutation:
@@ -57,7 +62,7 @@ class Mutation:
     @strawberry.mutation
     def update_employee(self, id:strawberry.ID, input: EmployeeInput) -> Employee:
         # 수정 쿼리
-        for idx, emp in enumerate(Employee):
+        for idx, emp in enumerate(EMPLOYEELIST):
             if emp.id == id:
                 update = Employee(
                     id = emp.id,
@@ -73,10 +78,11 @@ class Mutation:
         raise ValueError("Employee not found")
 
     @strawberry.mutation
-    def deleteEmployee(self, id:strawberry.ID) -> strawberry.ID:
+    def delete_employee(self, id:strawberry.ID) -> strawberry.ID:
         global EMPLOYEELIST
         # filter 함수와 유사
         EMPLOYEELIST = [e for e in EMPLOYEELIST if e.id != id]
+        return id
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
 graphql_app = GraphQLRouter(schema)
@@ -84,7 +90,8 @@ graphql_app = GraphQLRouter(schema)
 app = FastAPI()
 origins = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    "http://127.0.0.1:3000",
+    "http://192.168.254.1:3000",
 ]
 
 app.add_middleware(
