@@ -1,93 +1,60 @@
-from typing import List
-
+# main.py
 import strawberry
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
 
+from api.employee_resolver import Query, Mutation
+from api.employee_redis_resolver import RedisQuery, RedisMutation, get_redis_context
+from core.database import engine, Base, SessionLocal
+from core.context import CustomContext
+from services.employee_service import EmployeeService
+from services.employee_redis_service import EmployeeRedisService
+from core.redis_client import redis_client # Import the singleton instance
 
-@strawberry.type
-class Employee:
-    id: strawberry.ID
-    name: str
-    age: int
-    job: str
-    language: str
-    pay: int
+# --- FastAPI 애플리케이션의 설정 및 초기화 ---
 
-@strawberry.input
-class EmployeeInput:
-    name: str
-    age: int
-    job: str
-    language: str
-    pay: int
-
-EMPLOYEELIST: List[Employee] = [
-    Employee(id=1, name="John", age=35, job="frontend", language="react", pay=12),
-    Employee(id=2, name="Qohn", age=15, job="backend", language="java", pay=13),
-    Employee(id=3, name="Wohn", age=25, job="AI", language="python", pay=41),
-    Employee(id=4, name="Eohn", age=552, job="Infra", language="AWS", pay=51),
-    Employee(id=5, name="2222", age=2222, job="2222", language="2222", pay=2222)
-]
-
-@strawberry.type
-class Query:
-    @strawberry.field
-    def get_employee_list(self) -> List[Employee]:
-        return EMPLOYEELIST
-
-    @strawberry.field
-    def get_employee_by_id(self, input: int) -> Employee:
-        result = next((item for item in EMPLOYEELIST if item.id == str(input)), None)
-        return result
-
-@strawberry.type
-class Mutation:
-    @strawberry.mutation
-    def register_employee(self, input: EmployeeInput) -> Employee:
-        # Employee 등록하는 곳
-        new_id = str(len(EMPLOYEELIST) + 1)
-        new_emp = Employee(
-            id=new_id,
-            name=input.name,
-            age=input.age,
-            job=input.job,
-            language=input.language,
-            pay=input.pay
-        )
-        EMPLOYEELIST.append(new_emp)
-        return new_emp
-
-    @strawberry.mutation
-    def update_employee(self, id:strawberry.ID, input: EmployeeInput) -> Employee:
-        # 수정 쿼리
-        for idx, emp in enumerate(EMPLOYEELIST):
-            if emp.id == id:
-                update = Employee(
-                    id = emp.id,
-                    name = input.name,
-                    age = input.age,
-                    job = input.job,
-                    language = input.language,
-                    pay = input.pay
-                )
-                EMPLOYEELIST[idx] = update
-                return update
-        # 예외처리
-        raise ValueError("Employee not found")
-
-    @strawberry.mutation
-    def delete_employee(self, id:strawberry.ID) -> strawberry.ID:
-        global EMPLOYEELIST
-        # filter 함수와 유사
-        EMPLOYEELIST = [e for e in EMPLOYEELIST if e.id != id]
-        return id
-
+# 1. Strawberry 스키마 생성
 schema = strawberry.Schema(query=Query, mutation=Mutation)
-graphql_app = GraphQLRouter(schema)
+redis_schema = strawberry.Schema(query=RedisQuery, mutation=RedisMutation)
 
+# 2. Context Getters 정의
+def get_context() -> CustomContext:
+    db = SessionLocal()
+    try:
+        yield CustomContext(db=db)
+    finally:
+        db.close()
+
+# 3. GraphQL 라우터 생성
+graphql_app = GraphQLRouter(schema, context_getter=get_context)
+graphql_redis_app = GraphQLRouter(redis_schema, context_getter=get_redis_context)
+
+# 4. FastAPI 앱 인스턴스 생성
 app = FastAPI()
+
+# 5. 스타트업 이벤트 핸들러 설정
+@app.on_event("startup")
+async def startup_event():
+    """서버가 시작될 때 DB와 Redis를 각각 초기화합니다."""
+    # DB 테이블 생성 및 데이터 초기화 (동기 방식)
+    Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        db_service = EmployeeService(db)
+        db_service.init_db_data()
+    finally:
+        db.close()
+        
+    # Redis 데이터 초기화 (비동기 방식)
+    redis_conn = await redis_client.get_client()
+    try:
+        redis_service = EmployeeRedisService(redis=redis_conn)
+        await redis_service.init_redis_data()
+    finally:
+        await redis_conn.close()
+
+# 6. 미들웨어 설정
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -99,11 +66,14 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
+# 7. 라우터 포함
 app.include_router(graphql_app, prefix="/graphql")
+app.include_router(graphql_redis_app, prefix="/graphql-redis")
 
+# 기본 루트 경로
 @app.get("/")
 async def root():
-    return {"message": "Hello FastAPI"}
+    return {"message": "Hello FastAPI! Original(DB) and Redis-only GraphQL APIs are available."}
