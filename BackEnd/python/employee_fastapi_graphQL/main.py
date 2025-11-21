@@ -1,6 +1,5 @@
 # main.py
 import strawberry
-import asyncio
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
@@ -36,9 +35,9 @@ app = FastAPI()
 
 # 5. 스타트업 이벤트 핸들러 설정
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
     """서버가 시작될 때 DB와 Redis를 각각 초기화합니다."""
-    # DB 테이블 생성 및 데이터 초기화
+    # DB 테이블 생성 및 데이터 초기화 (동기 방식)
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
@@ -47,16 +46,13 @@ def startup_event():
     finally:
         db.close()
         
-    # Redis 데이터 초기화
-    async def init_redis():
-        redis_conn = await redis_client.get_client()
-        try:
-            redis_service = EmployeeRedisService(redis=redis_conn)
-            await redis_service.init_redis_data()
-        finally:
-            await redis_conn.close()
-
-    asyncio.run(init_redis())
+    # Redis 데이터 초기화 (비동기 방식)
+    redis_conn = await redis_client.get_client()
+    try:
+        redis_service = EmployeeRedisService(redis=redis_conn)
+        await redis_service.init_redis_data()
+    finally:
+        await redis_conn.close()
 
 # 6. 미들웨어 설정
 origins = [
