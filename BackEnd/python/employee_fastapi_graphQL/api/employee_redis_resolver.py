@@ -4,6 +4,7 @@ import strawberry
 from strawberry.types import Info
 from functools import cached_property
 from redis.asyncio import Redis
+from fastapi import Depends # strawberry.fastapi에서 Depends를 가져오도록 수정
 
 from core.redis_client import get_redis_session
 from schemas.employee_schema import Employee, EmployeeInput
@@ -18,7 +19,7 @@ class CustomRedisContext(strawberry.fastapi.BaseContext):
         return EmployeeRedisService(redis=self.redis)
 
 async def get_redis_context(
-    redis: Redis = strawberry.fastapi.Depends(get_redis_session),
+    redis: Redis = Depends(get_redis_session),
 ) -> CustomRedisContext:
     """
     요청마다 Redis 클라이언트를 포함한 Context 객체를 생성하는 의존성 주입(DI) 함수.
