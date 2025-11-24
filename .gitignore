@@ -6,3 +6,5 @@ FrontEnd/Nextjs/ts_employ/.idea/
 FrontEnd/Nextjs/ts_employ/package-lock.json
 FrontEnd/Nextjs/ts_employ_context/package-lock.json
 GEMINI.md
+Database/.env
+*.pem
