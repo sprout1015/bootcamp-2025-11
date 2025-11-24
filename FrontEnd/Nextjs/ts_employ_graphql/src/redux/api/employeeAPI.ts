@@ -2,7 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { EmployeeInfo } from "@/redux/slice/employeeSlice";
 import axios from "axios";
 
-const API_URL = "http://localhost:3002/graphql";
+const API_URL = "http://backend/graphql";
 
 // GraphQL 요청을 위한 헬퍼 함수
 const graphqlRequest = async (query: string, variables?: object) => {
