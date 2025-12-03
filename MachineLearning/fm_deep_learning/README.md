@@ -57,6 +57,8 @@ fm_deep_learning/
 │   ├── evaluator.py        # 평가 함수
 │   └── trainer.py          # 학습 클래스
 │
+├── api.py                  # FastAPI 서버 스크립트
+├── test_model.py           # 모델 테스트 스크립트
 ├── train.py                # 메인 실행 스크립트
 ├── requirements.txt
 └── README.md
@@ -83,17 +85,36 @@ pip install -r requirements.txt
 ```
 
 ### 3단계: 모델 학습 실행
-**실행 방법이 변경되었습니다.** 이제 루트 디렉토리의 `train.py`를 실행합니다.
-
 ```bash
 python train.py
 ```
 
 ---
 
-## 5. 실행 결과 예시
+## 5. 모델 활용
 
-학습 명령어를 실행하면 터미널에 다음과 같은 결과가 출력됩니다.
+학습된 모델을 사용하는 방법은 두 가지가 있습니다.
+
+### 1) API 서버 실행
+추천 모델을 API 형태로 제공하는 FastAPI 서버를 실행합니다.
+
+```bash
+uvicorn api:app --reload
+```
+서버가 실행되면, 웹 브라우저에서 `http://127.0.0.1:8000/docs` 로 접속하여 API 문서를 확인하고 직접 테스트해볼 수 있습니다.
+
+### 2) 단독 테스트 실행
+`test_model.py` 스크립트는 저장된 모델을 불러와 임의의 사용자에 대한 예측 및 추천을 수행하는 간단한 테스트입니다.
+
+```bash
+python test_model.py
+```
+
+---
+
+## 6. 실행 결과 예시
+
+`python train.py` 학습 명령어를 실행하면 터미널에 다음과 같은 결과가 출력됩니다.
 
 ```
 PyTorch device check: Using CPU
@@ -121,7 +142,7 @@ Model saved successfully -> ./model/fm_model.pt
 
 ---
 
-## 6. Python 기초 개념
+## 7. Python 기초 개념
 
 #### `__init__.py` 파일의 역할
 - `src` 같은 디렉토리 안에 `__init__.py` 파일이 있으면, 파이썬은 그 디렉토리를 하나의 **패키지(Package)**로 인식합니다.
