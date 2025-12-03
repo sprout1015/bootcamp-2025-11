@@ -13,7 +13,9 @@ def run_test():
     try:
         # CPU로 모델을 로드합니다. GPU에서 테스트하려면 "cpu"를 "cuda" 등으로 변경
         device = torch.device("cpu") 
-        checkpoint = torch.load(MODEL_PATH, map_location=device)
+        # PyTorch 최신 버전의 보안 정책에 따라, 가중치 외에 다른 객체(ID 맵)가 포함된 파일을 불러오려면
+        # weights_only=False 옵션을 명시적으로 추가해야 합니다.
+        checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=False)
         print(f"✅ Checkpoint loaded from {MODEL_PATH}")
     except FileNotFoundError:
         print(f"❌ Model file not found. Please run 'python train.py' first.")

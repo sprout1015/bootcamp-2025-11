@@ -34,7 +34,9 @@ def load_model():
     저장된 모델과 메타데이터(ID 맵)를 불러옵니다.
     """
     try:
-        checkpoint = torch.load(MODEL_PATH, map_location=model_data["device"])
+        # PyTorch 최신 버전의 보안 정책에 따라, 가중치 외에 다른 객체(ID 맵)가 포함된 파일을 불러오려면
+        # weights_only=False 옵션을 명시적으로 추가해야 합니다.
+        checkpoint = torch.load(MODEL_PATH, map_location=model_data["device"], weights_only=False)
         
         user_id_map = checkpoint["user_id_map"]
         item_id_map = checkpoint["item_id_map"]
