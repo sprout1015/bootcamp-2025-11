@@ -4,7 +4,7 @@
 
 이 프로젝트는 파이토치(PyTorch)를 사용한 간단한 **영화 추천 시스템** 예제입니다. 특히, 소프트웨어 공학의 **SOLID 원칙**을 적용하여 각 코드의 역할을 명확히 분리하고, 유지보수와 확장이 용이한 구조로 리팩토링하는 것에 초점을 맞춥니다.
 
-`Matrix Factorization (행렬 분해)` 알고리즘을 사용해 사용자가 아직 평가하지 않은 영화의 평점을 예측하는 모델을 학습합니다.
+`Matrix Factorization (행렬 분해)` 알고리즘을 사용해 사용자가 아직 평가하지 않은 영화의 평점을 예측합니다.
 
 ---
 
@@ -72,7 +72,64 @@ fm_deep_learning/
 
 ---
 
-## 5. 설치 및 실행 방법
+## 5. 프로젝트의 추천 방식: 협업 필터링 (Collaborative Filtering)
+
+이 프로젝트는 **협업 필터링(Collaborative Filtering)** 방식 중 하나인 `Matrix Factorization`을 활용합니다.
+
+-   **핵심 아이디어**: "나와 비슷한 취향을 가진 다른 사람들이 좋아한 아이템은 나도 좋아할 것이다." 라는 가설에 기반하여 추천을 수행합니다.
+-   **특징**: 이 방식은 **사용자(user)나 아이템(item) 자체의 명시적인 Feature(특성) 데이터가 없어도 작동**합니다. 오직 '누가(user) 무엇을(item) 어떻게(rating) 평가했는가'와 같은 **사용자-아이템 상호작용 기록**만을 사용하여 추천합니다.
+-   **잠재 요인(Latent Features) 발견**: 모델은 학습 과정에서 데이터에 명시적으로 주어지지 않은 사용자들과 영화들의 **숨겨진 특성(잠재 요인)**을 스스로 발견합니다. `embedding_dim` 파라미터가 바로 이 잠재 요인의 차원(개수)을 의미합니다. 예를 들어, 모델은 64차원 벡터로 사용자의 취향과 영화의 특성을 표현합니다.
+
+### 만약 Feature(특성)가 있다면? (What If We Have Features?)
+
+만약 사용자나 아이템에 대한 명시적인 Feature(예: 영화 장르, 감독, 배우, 사용자 연령, 성별 등)가 있다면, 이를 활용하여 추천 모델의 성능을 더욱 향상시킬 수 있습니다. 이는 주로 **하이브리드 추천 시스템**을 구축하는 방식으로 이어집니다.
+
+#### 1) 아이템(Item)에만 Feature가 있는 경우
+-   **시나리오**: 영화의 장르, 감독, 출연 배우 등의 정보는 있지만, 사용자에 대한 정보는 오직 평점 기록뿐인 경우.
+-   **처리 방법**:
+    1.  **아이템 Feature 임베딩**: 아이템의 각 Feature(예: 장르)를 임베딩(Embedding) 레이어를 통해 벡터로 변환합니다. 여러 Feature가 있다면 각 Feature의 임베딩 벡터들을 합치거나(sum) 이어 붙입니다(concatenate).
+    2.  **하이브리드 모델**: `Matrix Factorization`을 통해 학습된 사용자 임베딩 벡터와, 아이템 Feature를 통해 생성된 아이템 벡터를 결합합니다.
+    3.  **예측**: 이 결합된 벡터를 몇 개의 Fully Connected Layer(MLP)를 거쳐 최종 평점을 예측하게 만듭니다.
+-   **모델 구조 예시**:
+    ```mermaid
+    graph TD
+        A[User ID] --> B(User Embedding)
+        C[Item ID] --> D(Item Embedding)
+        E[Item Features] --> F(Feature Processing) --> G(Feature Embedding)
+        B & D & G --> H(Concatenate/Combine) --> I(MLP Layers) --> J(Prediction)
+    ```
+
+#### 2) 사용자(User)와 아이템(Item) 모두 Feature가 있는 경우
+-   **시나리오**: 영화의 메타데이터와 사용자의 프로필 정보(연령, 성별 등)가 모두 있는 가장 풍부한 정보 환경.
+-   **처리 방법**:
+    1.  **사용자/아이템 Feature 임베딩**: 각 사용자 및 아이템의 Feature를 개별적으로 처리하여 벡터로 변환합니다 (위 '아이템에만 Feature가 있는 경우'와 유사).
+    2.  **모든 정보 결합**: `Matrix Factorization`을 통해 학습된 사용자/아이템 임베딩 벡터와, 명시적인 사용자/아이템 Feature를 통해 생성된 벡터들을 모두 결합합니다.
+    3.  **예측**: 모든 정보가 결합된 하나의 큰 벡터를 여러 Fully Connected Layer(MLP)를 거쳐 최종 평점을 예측합니다.
+-   **모델 구조 예시 (Deep Learning Recommendation Model - DLRM 개념)**:
+    ```mermaid
+    graph TD
+        A[User ID] --> B(User Embedding)
+        C[User Features] --> D(Feature Processing) --> E(User Feature Embedding)
+        F[Item ID] --> G(Item Embedding)
+        H[Item Features] --> I(Feature Processing) --> J(Item Feature Embedding)
+        B & E & G & J --> K(Concatenate All) --> L(MLP Layers) --> M(Prediction)
+    ```
+
+#### 3) 다중 Feature(특성) 처리 방법 (예: 여러 개의 장르, 여러 명의 배우)
+-   하나의 도메인(사용자 또는 아이템)이 여러 개의 Feature를 가질 수 있습니다.
+-   **수치형 Feature (Numerical Features) (예: 영화 예산, 개봉 연도)**:
+    -   일반적으로 정규화(Normalization) 후 그대로 모델의 입력으로 사용하거나, 간단한 선형 변환을 거칠 수 있습니다.
+-   **범주형 Feature (Categorical Features) (예: 장르, 감독, 배우)**:
+    -   **원-핫 인코딩(One-Hot Encoding)**: 고유한 값이 적은 Feature(예: 성별)에 사용됩니다.
+    -   **임베딩 레이어(Embedding Layer)**: 고유한 값이 많은 Feature(예: 감독, 배우)에 가장 효과적입니다. 각 범주를 저차원의 밀집 벡터로 변환합니다. 여러 범주형 Feature가 있다면 각각 별도의 `nn.Embedding` 레이어를 생성합니다.
+-   **텍스트 Feature (Text Features) (예: 영화 줄거리)**:
+    -   **TF-IDF**: 전통적인 텍스트 벡터화 방법.
+    -   **사전 학습된 임베딩(Pre-trained Embeddings)**: Word2Vec, BERT, KoBERT 등 사전 학습된 언어 모델을 사용하여 텍스트에서 풍부한 의미론적 벡터를 추출합니다.
+-   **결합**: 이렇게 처리된 모든 Feature 벡터들(수치형, 범주형 임베딩, 텍스트 임베딩)을 하나로 이어 붙여(concatenate) 최종적으로 Fully Connected Layer의 입력으로 사용합니다.
+
+---
+
+## 6. 설치 및 실행 방법
 
 ### 1단계: 가상환경 설정 및 활성화
 ```bash
@@ -90,6 +147,11 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### 3단계: 모델 학습 실행
+```bash
+python train.py
+```
+
 ### 4) 데이터 분석 스크립트 실행
 `analyze_data.py` 스크립트를 실행하여 `ratings.pkl` 파일의 내용을 분석하고 주요 통계 정보를 확인할 수 있습니다.
 
@@ -98,7 +160,7 @@ python analyze_data.py
 ```
 ---
 
-## 6. 모델 활용
+## 7. 모델 활용
 
 ### 1) API 서버 실행
 추천 모델을 API 형태로 제공하는 FastAPI 서버를 실행합니다.
@@ -128,7 +190,7 @@ python test_model.py
 
 ---
 
-## 7. 개발 및 트러블슈팅
+## 8. 개발 및 트러블슈팅
 
 개발 과정에서 발생했던 주요 문제와 해결 과정을 공유합니다.
 
@@ -142,7 +204,7 @@ python test_model.py
 
 ---
 
-## 8. Python 기초 개념
+## 9. Python 기초 개념
 
 #### `__init__.py` 파일의 역할
 - `src` 같은 디렉토리 안에 `__init__.py` 파일이 있으면, 파이썬은 그 디렉토리를 하나의 **패키지(Package)**로 인식합니다. 덕분에 다른 파일에서 `from src.model import ...` 와 같이 쉽게 코드를 가져와 사용할 수 있습니다.
