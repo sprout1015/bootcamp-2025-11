@@ -90,9 +90,11 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3단계: 모델 학습 실행
+### 4) 데이터 분석 스크립트 실행
+`analyze_data.py` 스크립트를 실행하여 `ratings.pkl` 파일의 내용을 분석하고 주요 통계 정보를 확인할 수 있습니다.
+
 ```bash
-python train.py
+python analyze_data.py
 ```
 ---
 
