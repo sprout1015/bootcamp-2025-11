@@ -137,7 +137,8 @@ async def recommend(user_id: int, top_k: int = 10):
     # 모델 인덱스(idx)를 실제 영화 ID로 변환
     # 역방향 맵(idx -> id) 생성
     reversed_item_map = {v: k for k, v in item_map.items()}
-    recommended_movie_ids = [reversed_item_map[idx.item()] for idx in top_indices]
+    # FastAPI가 JSON으로 변환할 수 있도록, NumPy 숫자 타입을 표준 int 타입으로 캐스팅합니다.
+    recommended_movie_ids = [int(reversed_item_map[idx.item()]) for idx in top_indices]
 
     return {
         "user_id": user_id,
