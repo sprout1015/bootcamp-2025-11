@@ -1,0 +1,2 @@
+# Ignore generated model files
+model/fm_model.pt
